@@ -9,12 +9,12 @@ logging.basicConfig(
 )
 
 """
-####### List of commands #######
----> start - starts the bot
----> chat - start searching for a partner
----> exit - exit from the chat
----> newchat - exit from the chat and open a new one
----> stats - show bot statistics (only for admin)
+####### List commands #######
+---> start - start bot
+---> chat - cari lawan bicara
+---> exit - keluar dari obrolan
+---> newchat - keluar dari chat dan mencari yang lainnya
+---> stats - lihat statistics (cuman admin)
 """
 
 
@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     :return: status USER_ACTION
     """
     await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text="Welcome to this ChatBot! 🤖\nType /chat to start searching for a partner")
+                                   text="Welcome! \nKetik /chat untuk mencari obrolan")
 
     if my_data.get_user_status(user_id=update.effective_chat.id) is None:
         my_data.set_user_status(user_id=update.effective_user.id, new_status=Status.IDLE)
@@ -79,7 +79,7 @@ async def handle_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if other_user is not None:
         # If the user has been paired, then he/she is already in a chat, so warn him/her
         await context.bot.send_message(chat_id=current_user,
-                                       text="You are already in a chat, type /exit to exit from the chat.")
+                                       text="Kamu di dalam obrolan, ketik /exit untuk keluar dari obrolan.")
         return None
 
     else:
@@ -97,11 +97,11 @@ async def handle_not_in_chat(update: Update, context: ContextTypes.DEFAULT_TYPE)
     current_user = update.effective_user.id
     if my_data.get_user_status(user_id=current_user) in [Status.IDLE, Status.PARTNER_LEFT]:
         await context.bot.send_message(chat_id=current_user,
-                                       text="You are not in a chat, type /chat to start searching for a partner.")
+                                       text="Kamu tidak berada dalam obrolan, ketik /chat untuk mencari obrolan.")
         return
     elif my_data.get_user_status(user_id=current_user) == Status.IN_SEARCH:
         await context.bot.send_message(chat_id=current_user,
-                                       text="Message not delivered, you are still in search!")
+                                       text="Pesan tidak terkirim, kamu sedang mencari lawan bicara!")
         return
 
 
@@ -112,7 +112,7 @@ async def handle_already_in_search(update: Update, context: ContextTypes.DEFAULT
     :param context: context of the bot
     :return: None
     """
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="You are already in search!")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Kamu sedang mencari!")
     return
 
 
@@ -126,7 +126,7 @@ async def start_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     current_user = update.effective_user.id
     my_data.set_user_status(user_id=current_user, new_status=Status.IN_SEARCH)
 
-    await context.bot.send_message(chat_id=current_user, text="Searching for a partner...")
+    await context.bot.send_message(chat_id=current_user, text="Sedang mencari lawan bicara...")
     user_id = update.effective_chat.id
     logging.info("User %d started a search", user_id)
 
@@ -134,7 +134,7 @@ async def start_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         # If the user has been paired, then simply return
         return
     else:
-        logging.info("User: " + str(current_user) + " NOT PAIRED, no other partner in search")
+        logging.info("User: " + str(current_user) + "Tidak menemukan lawan bicara")
         return
 
 
@@ -151,8 +151,8 @@ async def retrieve_coupling_partner(update, context) -> bool:
 
     if user_id is not None:
         # Send the message to both the users
-        await context.bot.send_message(chat_id=current_user, text="You have been paired with an user")
-        await context.bot.send_message(chat_id=user_id, text="You have been paired with an user")
+        await context.bot.send_message(chat_id=current_user, text="Kamu sudah menemukan lawan bicara.")
+        await context.bot.send_message(chat_id=user_id, text="Kamu sudah menemukan lawan bicara.")
         # Update their status to coupled
         my_data.set_user_status(user_id=current_user, new_status=Status.COUPLED)
         my_data.set_user_status(user_id=user_id, new_status=Status.COUPLED)
@@ -193,7 +193,7 @@ async def exit_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     """
     current_user = update.effective_user.id
     if my_data.get_user_status(user_id=current_user) != Status.COUPLED:
-        await context.bot.send_message(chat_id=current_user, text="You are not in a chat!")
+        await context.bot.send_message(chat_id=current_user, text="Kamu tidak berada dalam obrolan!")
         return False
 
     other_user = my_data.search_partner_of(current_user)
@@ -202,9 +202,9 @@ async def exit_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
 
     await context.bot.send_message(chat_id=current_user, text="Ending chat...")
     await context.bot.send_message(chat_id=other_user,
-                                   text="Your partner has left the chat, type /chat to start searching for a new "
+                                   text="Lawan bicara meninggalkan obrolan, ketik /chat untuk mencari obrolan lain"
                                         "partner.")
-    await update.message.reply_text("You have left the chat.")
+    await update.message.reply_text("Kamu meninggalkan obrolan.")
 
     my_data.set_user_status(user_id=current_user, new_status=Status.IDLE)
     my_data.set_user_status(user_id=other_user, new_status=Status.PARTNER_LEFT)
