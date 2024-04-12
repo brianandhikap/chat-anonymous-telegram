@@ -5,7 +5,7 @@
 2. Install atau upgrade
    ```bash
    $ pip install python-telegram-bot --upgrade
-    
+
 3. Edit config.py (ADMIN_ID dan BOT_TOKEN)
     ```python
     # config.py
