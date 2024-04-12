@@ -4,13 +4,13 @@
    
 2. Install atau upgrade
    ```bash
-   $ pip install python-telegram-bot --upgrade
+   pip install python-telegram-bot --upgrade
 
 3. Edit config.py (ADMIN_ID dan BOT_TOKEN)
     ```python
     # config.py
 
-    BOT_TOKEN = "Token_Bot_Mu"
+    BOT_TOKEN = "Token_Bot_mu"
     ADMIN_ID = "ID_Telegram_mu"
 
 4. Kembangkan sendiri bot mu di bot.py dan my_data.py
